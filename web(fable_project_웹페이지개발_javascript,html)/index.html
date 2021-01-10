@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <title>FABLE</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link href="index.css" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+</head>
+
+<body>  
+
+  <!-- 네비게이션 바 시작 -->
+  <nav class="navbar navbar-inverse navbar-fixed-top bs-docs-nav" role="banner">
+      <div class="container">
+          <!-- Brand and toggle get grouped for better mobile display -->
+          <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
+                  aria-expanded="false">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="/">FABLE</a>
+          </div>
+  
+          <!-- Collect the nav links, forms, and other content for toggling -->
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+              <ul class="nav navbar-nav">
+                  <li class="active">
+                      <a href="/">Home</a>
+                  </li>
+                  <li>
+                      <a href="/mypage.html">mypage</a>
+                  </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                  <li>
+                      <a id="joinmenu" href="/join.html">Join</a>
+                  </li>
+                  <li>
+                      <a id="loginmenu" href="/login.html">Login</a>
+                  </li>
+                </ul>
+          </div>
+          <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container-fluid -->
+  </nav>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+  <!-- 네비게이션 바 끝 -->
+
+
+
+  <!-- 점보트론 시작 -->
+  <div class="container">
+    <div class="jumbotron">
+      <h1>
+        <span style="color:white">당신의 패션을 뽐내세요.</span>
+      </h1>
+      <p>
+        <span style="color:white">FABLE은 패션과 SNS를 결합하여 패션에 관심이 있는 유저들의 공간입니다.</span>
+      </p>
+    </div>
+  </div>
+  <br>
+  <!-- 점보트론 끝 -->
+
+
+  <!-- 쓰기 텍스트 필드 시작-->
+  <div class="container">
+    <div class="media">
+      <label for="url">오늘의 패션:</label>
+      <div class="media-ceter">
+        <img id="myimage" src="https://www.w3schools.com/bootstrap/img_avatar3.png" class="img-rounded" style="width:330px; height:400px">
+        <div id="url">
+        </div>
+      </div>
+      <br>
+
+      <!-- 쓰기 버튼 가운데 정렬 -->
+      <div class="text-center">
+        <button type="button" class="btn btn-warning" id="write">FABLE</button>
+      </div>
+    </div>
+  </div>
+  <!-- 쓰기 필드 끝-->
+
+
+
+  <!-- 패션리스트 출력하기-->
+  <div class="container">
+    <hr>
+    <h3>패션리스트</h3>
+    <br>
+    <!-- 패션 리스트 붙일 곳 -->
+    <div class="thanksList">
+    </div>
+  </div>
+<!--현재 시간을 가져오는 js 파일 -->
+  <script src="./js/time.js"></script>
+
+  <!--스크립트 부분. 자신의 스크립트 코드로 변경하세요! -->
+  <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
+  <script>
+    var firebaseEmailAuth; //파이어베이스 email 인증 모듈 전역변수
+    var firebaseDatabase; //파이어베이스 db 모듈 전역변수
+    //var currentTime; // 현재 시간 가져오는 함수, time.js 파일에 따로 빼놓았다.
+    var name; //유저 이름
+    var loginUserKey; //로그인한 유저의 부모 key
+    var userInfo; //로그인한 유저의 정보 object type
+    var comment; //유저가 쓴글 내용 저장
+    var url; //사진이 저장될 url
+    //파이어 베이스 초기화 코드
+    var config = {
+      apiKey: "AIzaSyCfJlb4zcdginuT2wR80wREEmzQLl90Dy0",
+      authDomain: "fable-af9a4.firebaseapp.com",
+      databaseURL: "https://fable-af9a4.firebaseio.com",
+      projectId: "fable-af9a4",
+      storageBucket: "fable-af9a4.appspot.com",
+      messagingSenderId: "1020962878178",
+      appId: "1:1020962878178:web:46db18c805520d6c8d24bb",
+      measurementId: "G-CPGEXE0VJW"
+    };
+    firebase.initializeApp(config);
+    //인증모듈 객체 가져오기
+    firebaseEmailAuth = firebase.auth();
+    //데이터베이스 모듈객체 가져오기
+    firebaseDatabase = firebase.database();
+    
+    //세션 체크 함수
+    userSessionCheck();
+    $(document).ready(function () {
+
+    //메인화면 패션 fable버튼 눌렀을 때
+    $(document).on('click', '#write', function () {
+      
+      //네비게이션 메뉴의 text값 가져오기 - 자바스크립트 dom 방식으로 가져왔다.
+      var seseionCheck = document.getElementById("loginmenu").textContent;
+
+      //내가 올린 이미지 가져오기 - jquery방식으로 가져왔다.
+      if (seseionCheck == "로그아웃") {
+        //저장하기
+        saveThanks();
+      } else {
+        alert("로그인이 필요한 서비스 입니다.")
+      }
+    });
+    });
+
+
+
+    //fable 버튼 눌렀을 때 호출 되는 함수
+    function saveThanks() {
+      var fableBtn = document.getElementById("write");
+      var fableBtnText = fableBtn.textContent;
+      if (fableBtnText == "FABLE") {
+        console.log("FABLE 버튼 - input file 나타나고 - p 태그 대신 input text 태그로 변경시키기 - UPLOAD 활성화 작업을 시작합니다");
+        //thanks 라는 테이블을 만들고 하위 데이터에 유저 아이디를 넣어준다. 그곳에 push로 가상의 키를 넣고, 객체를 넣어준다.!!!!
+        var html = "<input type=\"file\" id=\"fileButton2\" />";
+        $("#url").append(html);
+        console.log("input file 붙여주기 완료");
+
+      //UPLOAD 버튼 활성화
+      fableBtn.textContent = "UPLOAD"
+      fableBtn.className = "btn btn-success";
+    } else{
+      console.log("저장 버튼 - input file 사라지게 input text태그 사라지고 p 태그에 넣고 저장버튼 비활성화 수정버튼 활성화를 시작");
+      console.log("upload 함수 호출");
+      var saveChack = imageStateMsgAllSave2();
+            //로그인한 유저의 pk값,이름,내용,시간 데이터
+      var thankRef = firebaseDatabase.ref("thanks");
+        // 해당 객체의 key 값이 자동으로 생성된다.
+      var thank = thankRef.push(); // 해당 객체의 key 값이 자동으로 생성된다.
+      if (saveChack) {
+        var parent = document.getElementById("url");
+        var child = document.getElementById("fileButton2");
+        parent.removeChild(child);
+        console.log("활성화된 input file 객체 삭제 완료");
+        $("#write").hide();
+        console.log("저장되었습니다");
+    }
+    }
+  }
+    function imageStateMsgAllSave2() {
+            console.log("imageStateMsgAllSave로 들어왔습니다");
+
+            //파일을 파이어 베이스 스토리지에 저장하는 로직
+            var fileButton3 = document.getElementById("fileButton2");
+            //수정 버튼을 눌러서 fileButton3 객체가 생기면~! 작동
+            if (fileButton3) {
+                //fileButton.addEventListener('change', function (e) {
+                console.log("fileButton2.addEventListener('change', function(e){ 함수 호출 - 들어왔습니다");
+                var file = fileButton3.files[0];
+                //현재 유저 키를 파일이름으로 지정
+                var storageRef = firebase.storage().ref(currentTime);
+                var task = storageRef.put(file);
+                // #.핵심
+                //이곳에서 파이어베이스 스토리지에도 저장해주고, 데이터베이스에도 저장해줘야 함.
+                //유저키(부모키)를 레퍼런스로 잡고 url 추가해줌 userSessionCheck() 먼저 실행
+                //사진을 업데이트 하고 현재 상태글 업데이트 하고, 다시 불러오기
+                //비동기 방식으로 움직임
+                //최종완료되었을때 이곳에서 끝난다
+                task.then(function (snapshot) {
+                    url = snapshot.downloadURL;
+                    console.log("파이어베이스 스토리지에 저장된 주소 =  " + url);
+                    //파이어베이스에 이미지를 저장한후 그 url을 바로 가져와서 img 태그에 적용해줌
+                    document.querySelector('#myimage').src = url;
+
+                    //여기에 user 레퍼런스에 사진 url 저장
+                    //선택된 키가 있으면 수정
+                    var thankRef = firebaseDatabase.ref("thanks");  // 해당 객체의 key 값이 자동으로 생성된다.
+                    var thank = thankRef.push();// 해당 객체의 key 값이 자동으로 생성된다.
+                    var obj = {
+                      userkey: loginUserKey,
+                      name: name,
+                      createtime: currentTime,
+                      imgURl: url
+                    };
+                    thank.set(obj);
+                    console.log("파이어베이스 데이터베이스 user 레퍼런스에 성공적으로 저장 완료");
+                    alert("성공적으로 업로드되었습니다.")
+
+                })
+                    .catch(function (error) {
+                        console.error(error);
+                        return;
+                    });
+
+                //});
+
+            }
+            return true;
+        }
+
+    //유저가 로그인 했는지 안했는지 확인해주는 함수
+    function userSessionCheck() {
+      console.log(currentTime);
+      //로그인이 되어있으면 - 유저가 있으면, user를 인자값으로 넘겨준다.
+      firebaseEmailAuth.onAuthStateChanged(function (user) {
+        
+        if (user) {
+          //조회 - 데이터 베이스에 저장된 닉네임을 현재 접속되어 있는 user의 pk key 값을 이용해서 가져오기
+          firebaseDatabase.ref("users/" + user.uid).once('value').then(function (snapshot) {
+            
+            //자바스크립트 dom 선택자를 통해서 네비게이션 메뉴의 엘리먼트 변경해주기
+            document.getElementById("loginmenu").textContent = "로그아웃";
+            document.getElementById("loginmenu").href = "/logout.html";
+            document.getElementById("joinmenu").textContent = "반가워요! " + snapshot.val().name + " 님";
+            document.getElementById("joinmenu").href = "#";
+
+            name = snapshot.val().name;   //유저 닉네임은 계속 쓸거기 때문에 전역변수로 할당
+            loginUserKey = snapshot.key;  //로그인한 유저의 key도 계속 쓸 것이기 때문에 전역변수로 할당
+            userInfo = snapshot.val(); //snapshot.val()에 user 테이블에 있는 해당 개체 정보가 넘어온다. userInfo에 대입!
+            
+
+            //alert(userInfo.userid);  //uid는 db에서 user 테이블의 각 개체들의 pk 인데, 이 값은 인증에서 생성된 아이디의 pk 값과 같다. *중요!
+            thanksList();
+            return true
+          });
+
+        } else {
+          return false
+        }
+      });
+    }
+    //전체 유저의 업로드한 사진 목록가져와서 뿌려주기
+    function thanksList() {
+      //로그인한 유저라면
+      if(loginUserKey){
+          //레퍼런스 값 가져오기
+          var thanksRef = firebaseDatabase.ref('thanks');
+          //on 함수로 사진 목록가져오기
+          thanksRef.on('child_added', on_thanks_list)
+      }else{
+        alert("실패")
+        return;
+      }
+
+
+    }
+
+    //패션리스트 thanks 테이블의 thanks 키 들을 연속적으로 가져온다.
+    function on_thanks_list(data) {
+      console.log("on_thanks_list() 함수안으로 들어왔습니다 리스트를 가져오겠습니다")
+      var key = data.key;
+
+      var Data = data.val();
+      var createtime = Data.createtime;
+      var name = Data.name;
+      var imgURl = Data.imgURl;
+      var userkey = Data.userkey;
+
+      //alert(comment +"/"+ createtime + "/"+name +"/"+userkey);
+
+
+      //패션리스트 동적으로 붙이기
+      var html =
+        "<a href=\"mypage.html?userkey=" + userkey + "\">" +
+        "<img src='" + imgURl + "' class=\"img-rounded\" style=\"width:330px; height:400px; margin:15px\">" +
+        "</a>";
+      
+      $(".thanksList").append(html);
+
+    }
+
+
+  </script>
+
+
+
+  </script> 
+
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+면적당 cctv 비율 top 5 와 범죄발생률 상관관계 높게 나타나고 유의함
+면적당 cctv 비율 top 10 x
+면적당 cctv 비율 down 5  x
+면적당 cctv 비율 down 10  x
+인구밀도당 cctv 비율 top 5 x
+인구밀도당 cctv 비율 top 10 x
+인구밀도당 cctv 비율 down 5 x
+인구밀도당 cctv 비율 down 10 x
+cctv 비율 top 5 X
+cctv 비율 top 10 X
+cctv 비율 down 5 x
+cctv 비율 down 10 x
